@@ -3,15 +3,48 @@ import math
 from bisect import bisect
 from time import time
 from contracts import Arguments
+import numba
 
 
 class MC_Option(object):
-    def __init__(self, object_name: Arguments):
-        self.Arguments = Arguments
+
+    def __init__(self, args: Arguments):
+        self.args = args
+        self.obvSet = None
+        self.path = None
 
     # def simulatePath(self):
     #     simulatedS = np.zeros()
+
+    def LastingTradeDayInterval(self):
+        args = self.args
+        if args.pricingDay > args.expiryDate:
+            print('expiryDay should be after pricingDay')
+            raise ValueError
+        if args.oneYear == 365:
+            interval = args.expiryDate - args.pricingDay
+        elif 232 <= args.oneYear <= 252:
+            left = self.RightBound(args.holidays, 0, len(args.holidays) - 1, args.pricingDay)
+            right = self.RightBound(args.holidays, left, len(args.holidays) - 1, args.expiryDate)
+            interval = args.expiryDate - args.pricingDay + right - left
+        else:
+            print('oneYear should between 232 and 252 or equal 365')
+            raise ValueError
+        return interval
+
     @staticmethod
-    def TradeDayInterval(holidays, pricingDay, expiryDay, oneYear):
-        if oneYear == 365:
-            interval = expiryDay - pricingDay
+    def RightBound(arr, left, right, target):
+        while right > left:
+            mid = (right - left) / 2 + left
+            if arr[mid] > target:
+                return mid
+            if arr[mid] > target:
+                right = mid
+                continue
+            if arr[mid] < target:
+                left = mid + 1
+                continue
+        return left
+
+    def getObvSet(self):
+        pass
