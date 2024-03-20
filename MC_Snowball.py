@@ -9,8 +9,12 @@ class MC_Snowball(MC_Option):
     def __init__(self, args: SnowballArgs):
         super().__init__(args)
         self.sn_args = args
+        # self.Obv_set = np.array([0])
 
-    def getObvSet(self):
+    def generateObvSet(self):
         pricingDay = self.args.pricingDay
         knockOutDays = self.sn_args.knockOutObv
         knockInDays = self.sn_args.knockInObv
+        # todo:敲出观察日和敲入观察日要消除包含估值日期当日及其之前的天
+        for knockInDay in knockInDays:
+            self.obvSet = np.append(self.obvSet, self.TradeDayInterval(knockInDay))
