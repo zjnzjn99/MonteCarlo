@@ -10,7 +10,7 @@ class MC_Option(object):
 
     def __init__(self, args: Arguments):
         self.args = args
-        self.obvSet = np.array([0])
+        self.obvSet = {0}
         self.path = None
 
     def TradeDayInterval(self, date: int):
@@ -55,7 +55,12 @@ class MC_Option(object):
         simulatedS = np.zeros((Obv_size, pathNum))
         # todo:spot要除refs
         simulatedS[0] = self.args.spot
-        for t in range(Obv_size):
+        for t in range(1, Obv_size):
             z = np.random.standard_normal(pathNum)
-            time_incr = self.obvSet
-            simulatedS[t] = simulatedS[t - 1] * np.exp((rf - q - 0.5 * vol ** 2))
+            time_incr = self.obvSet[t] - self.obvSet[t - 1]
+            simulatedS[t] = simulatedS[t - 1] * np.exp(
+                (rf - q - 0.5 * vol ** 2) * time_incr + vol * math.sqrt(time_incr) * z)
+        return simulatedS
+
+    def payoff(self, S, t):
+        pass

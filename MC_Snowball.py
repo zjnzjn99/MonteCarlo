@@ -16,5 +16,11 @@ class MC_Snowball(MC_Option):
         knockOutDays = self.sn_args.knockOutObv
         knockInDays = self.sn_args.knockInObv
         # todo:敲出观察日和敲入观察日要消除包含估值日期当日及其之前的天
-        for knockInDay in knockInDays:
-            self.obvSet = np.append(self.obvSet, self.TradeDayInterval(knockInDay))
+        knockInDays = set(self.TradeDayInterval(kiDay) for kiDay in knockInDays)
+        knockOutDays = set(self.TradeDayInterval(koDay) for koDay in knockOutDays)
+        # for knockInDay in knockInDays:
+        #     self.obvSet = np.append(self.obvSet, self.TradeDayInterval(knockInDay))
+        #
+        self.obvSet = knockOutDays | knockOutDays | self.obvSet
+    # def payoff(self, S, t):
+    #     # if()
