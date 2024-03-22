@@ -10,7 +10,7 @@ class MC_Option(object):
 
     def __init__(self, args: Arguments):
         self.args = args
-        self.obvSet = {0}
+        self.obvSet = None
         self.path = None
 
     def TradeDayInterval(self, date: int):
@@ -62,5 +62,5 @@ class MC_Option(object):
                 (rf - q - 0.5 * vol ** 2) * time_incr + vol * math.sqrt(time_incr) * z)
         return simulatedS
 
-    def payoff(self, S, t):
+    def payoff(self, S):
         pass

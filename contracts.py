@@ -25,10 +25,11 @@ class Arguments(object):
 
 
 class AutoCallArgs(Arguments):
-    def __init__(self, pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate, isKnockIn, notionalRate,
-                 knockOutObv, knockInObv, knockOutBarrier, knockInBarrier, knockOutCoupon, strike, guaranteedRate,
-                 backPremium):
-        super().__init__(pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate)
+    def __init__(self, pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate, pathNum, oneYear, isKnockIn,
+                 notionalRate, knockOutObv, knockInObv, knockOutBarrier, knockInBarrier, knockOutCoupon, strike,
+                 guaranteedRate, backPremium, isAdvancePaymentAllCounted):
+        super().__init__(pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate, pathNum, oneYear)
+        self.isAdvancePaymentAllCounted = isAdvancePaymentAllCounted
         self.isKnockIn = isKnockIn
         self.notionalRate = notionalRate
         self.knockOutObv = knockOutObv
@@ -43,11 +44,11 @@ class AutoCallArgs(Arguments):
 
 
 class SnowballArgs(AutoCallArgs):
-    def __init__(self, pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate,
+    def __init__(self, pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate, pathNum, oneYear,
                  isKnockIn, notionalRate, knockOutObv, knockInObv, knockOutBarrier, knockInBarrier, knockOutCoupon,
-                 strike, guaranteedRate, backPremium, rebate, kiPartRate):
-        super().__init__(pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate, isKnockIn, notionalRate,
-                         knockOutObv, knockInObv, knockOutBarrier, knockInBarrier, knockOutCoupon, strike,
-                         guaranteedRate, backPremium)
+                 strike, guaranteedRate, backPremium, isAdvancePaymentAllCounted, rebate, kiPartRate):
+        super().__init__(pricingDay, spot, notional, refs, rf, q, vol, holidays, expiryDate, pathNum, oneYear,
+                         isKnockIn, notionalRate, knockOutObv, knockInObv, knockOutBarrier, knockInBarrier,
+                         knockOutCoupon, strike, guaranteedRate, backPremium, isAdvancePaymentAllCounted)
         self.rebate = rebate
         self.kiPartRate = kiPartRate
