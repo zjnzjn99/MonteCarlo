@@ -10,6 +10,7 @@ class MC_AutoCall(MC_Option):
     def __init__(self, args: AutoCallArgs):
         super().__init__(args)
         self.autoCall_args = args
+        self.presentValue = 0.
 
     def payoffKnockIn(self, S, notionalInterestCountedRate):
         pass
@@ -21,8 +22,10 @@ class MC_AutoCall(MC_Option):
         pass
 
     def Pv(self):
+        # initialize Pv
+        Pv = 0.
         if len(self.obvSet) == 1:
             return self.payoff(self.autoCall_args.spot)
         simulatedS = self.simulatePath()
-
-
+        # 敲出状态记录 0-敲出 1-未敲出
+        knockOutStatus = np.zeros([1, self.autoCall_args.pathNum])

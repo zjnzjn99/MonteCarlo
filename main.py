@@ -26,5 +26,27 @@ if __name__ == '__main__':
     # print(result)
     matrix = np.array([[1, 2, 3], [4, 5, 6]])
     print(matrix.shape[0])
+    b1 = np.array([0, 1, 0, 0, 0, 1, 0, 0])
+    b2 = np.array([1, 1, 0, 1, 1, 1, 1, 1])
+    b3 = b1 | b2
+    print(b3)
+    # a = input()
+    # b = input()
+    # x = np.linspace(0, int(b) + 50, 51 + int(b))
+    # strike_low = 75
+    # strike_mid = 80
+    # strike_high = 100
+    # cap = 200
+    #
+    #
+    # def func(s):
+    #     return -max(0, strike_low - s) + max(0, strike_mid - s) - \
+    #         max(0, strike_high - s) + max(0, s - strike_high) - max(0, s - cap)
+    #
+    #
+    # result = map(func, x)
+    # print(list(result))
 
+    b4 = 5.7 * np.exp(-6) * b1
+    print(b4.mean())
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
