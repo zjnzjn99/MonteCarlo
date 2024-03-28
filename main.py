@@ -49,4 +49,33 @@ if __name__ == '__main__':
 
     b4 = 5.7 * np.exp(-6) * b1
     print(b4.mean())
+    # 筛选出含有特定值的列
+    array = np.array([[1, 2, 3],
+                      [4, 5, 6],
+                      [7, 8, 9],
+                      [1, 4, 7],
+                      [2, 3, 5]])
+
+    # 筛选条件：列的最小值大于1
+    threshold = 4
+    array = array.T
+    # 找到满足条件的列的索引
+    # condition = np.where(array[0] > threshold, True, False)
+    #
+    # # 使用condition作为布尔索引来筛选列
+    # m_array = array * condition
+    # print("m_array=", m_array)
+    # filtered_array = array[:, condition]
+    #
+    # print(filtered_array)
+
+
+    def test(x):
+        for i in range(x.shape[0]):
+            condition_ = np.where(x[i] > 4, True, False)
+            x = x[:, condition_]
+        return
+
+    test(array)
+    print(array)
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

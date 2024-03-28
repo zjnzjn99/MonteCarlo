@@ -10,7 +10,9 @@ class MC_Snowball(MC_AutoCall):
 
     def __init__(self, args: SnowballArgs):
         super().__init__(args)
-        self.knockOutStatus = None
+        self.notionalInterestCountedRate = 1.
+        self.knockInTimes = 0.
+        self.knockOutTimes = 0.
         self.sn_args = args
         # self.isKnockOut = False
 
@@ -28,22 +30,23 @@ class MC_Snowball(MC_AutoCall):
         self.obvSet = np.array(list(self.obvSet))
         return self.obvSet
 
-    def payoffKnockIn(self, S, notionalInterestCountedRate):
-        return self.sn_args.notionalRate + notionalInterestCountedRate * self.sn_args.backPremium[-1] - min(
+    def payoffKnockIn(self, S):
+        # todo: 在数据处理的时候记得初始化self.notionalInterestCountedRate
+        return self.sn_args.notionalRate + self.notionalInterestCountedRate * self.sn_args.backPremium[-1] - min(
             1 - self.sn_args.guaranteedRate,
             max(self.sn_args.strike - S, 0) * self.sn_args.kiPartRate)
 
     def payoff(self, S):
         isKnockIn = self.sn_args.isKnockIn
-        notionalInterestCountedRate = self.sn_args.isAdvancePaymentAllCounted if 1. else self.sn_args.notionalRate
+        self.notionalInterestCountedRate = self.sn_args.isAdvancePaymentAllCounted if 1. else self.sn_args.notionalRate
         if S >= self.sn_args.knockOutBarrier[-1]:
-            payoff = self.sn_args.notionalRate + notionalInterestCountedRate * self.sn_args.backPremium[-1] + \
+            payoff = self.sn_args.notionalRate + self.notionalInterestCountedRate * self.sn_args.backPremium[-1] + \
                      self.sn_args.knockOutCoupon[-1]
         elif isKnockIn or S <= self.sn_args.knockOutBarrier[-1]:
             # self.sn_args.contractStatus = contracts.ContractStatus.KnockIn
-            payoff = self.payoffKnockIn(S, notionalInterestCountedRate)
+            payoff = self.payoffKnockIn(S)
         else:
-            payoff = self.sn_args.notionalRate + notionalInterestCountedRate * self.sn_args.backPremium[-1] \
+            payoff = self.sn_args.notionalRate + self.notionalInterestCountedRate * self.sn_args.backPremium[-1] \
                      + self.sn_args.rebate
         return payoff
 
@@ -68,14 +71,54 @@ class MC_Snowball(MC_AutoCall):
             # return 0
             return 0.
 
-    def payoffKnockOut_list(self, S: np.array([]), t):
+    def KnockOutFilter(self, S: np.array([])):
         """
 
-        :param S: an array of simulated S at time t
-        :param t: knock-out time
-        :return: None
+        :param S: Simulated Paths
+        :return: Filtered Simulated paths without knock-out
         """
-        self.knockOutStatus = np.where(S >= self.sn_args.knockOutBarrier[t], 1, 0)
-        couponStatus = (self.sn_args.knockOutCoupon[t] * np.exp(-self.args.rf * t) * self.knockOutStatus)
-        self.presentValue += couponStatus.mean()
+        for t in self.sn_args.knockOutObv:
+            knockOutStatus = np.where(S[t] >= self.sn_args.knockOutBarrier[t], 1, 0)
+            condition = np.array([map(self.filter_condition, knockOutStatus)])
+            self.knockOutTimes += knockOutStatus.sum()
+            couponStatus = self.sn_args.knockOutCoupon[t] * np.exp(-self.args.rf * t)
+            self.presentValue += couponStatus * self.knockOutTimes / self.sn_args.pathNum
+            S = S[:, condition]
+        return S
 
+    def KnockInFilter(self, S: np.array([])):
+        """
+
+        :param S: Simulated Paths
+        :return: Filtered Simulated Paths without knock-in
+        """
+        for t in self.sn_args.knockInObv:
+            knockInStatus = np.where(S[t] <= self.sn_args.knockInBarrier[t], 1, 0)
+            condition = np.array([map(self.filter_condition, knockInStatus)])
+            self.knockInTimes += knockInStatus.sum()
+            S = S[:, condition]
+            payoff_KnockIn = np.array([map(self.payoffKnockIn, S)])
+            Pv_KnockIn = payoff_KnockIn * np.exp(-self.args.rf * self.sn_args.knockInObv[-1])
+            self.presentValue += Pv_KnockIn.sum() / self.sn_args.pathNum
+
+        return S
+
+    def Pv(self):
+        # initialize Pv
+        Pv = 0.
+        if len(self.obvSet) == 1:
+            return self.payoff(self.autoCall_args.spot)
+        simulatedS = self.simulatePath()
+        # knock-out filter
+        filtered_S = self.KnockOutFilter(simulatedS)
+        # knock-in filter
+        filtered_S = self.KnockInFilter(filtered_S)
+        # calculate !knock-out and !knock-in
+
+
+    @staticmethod
+    def filter_condition(status):
+        if status:
+            return False
+        else:
+            return True
