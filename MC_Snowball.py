@@ -1,3 +1,5 @@
+import math
+
 from ipyparallel import Client
 
 import contracts
@@ -82,7 +84,7 @@ class MC_Snowball(MC_AutoCall):
             condition = np.array([map(self.filter_condition, knockOutStatus)])
             self.knockOutTimes += knockOutStatus.sum()
             couponStatus = self.sn_args.knockOutCoupon[t] * np.exp(-self.args.rf * t)
-            self.presentValue += couponStatus * self.knockOutTimes / self.sn_args.pathNum
+            self.presentValue += couponStatus * knockOutStatus.sum() / self.sn_args.pathNum
             S = S[:, condition]
         return S
 
@@ -103,6 +105,10 @@ class MC_Snowball(MC_AutoCall):
 
         return S
 
+    def PvRebate(self, S):
+        self.presentValue += self.sn_args.rebate * math.exp(-self.args.rf * self.obvSet[-1]) * S.shape[1]
+        return
+
     def Pv(self):
         # initialize Pv
         Pv = 0.
@@ -114,7 +120,8 @@ class MC_Snowball(MC_AutoCall):
         # knock-in filter
         filtered_S = self.KnockInFilter(filtered_S)
         # calculate !knock-out and !knock-in
-
+        self.PvRebate(filtered_S)
+        return self.presentValue
 
     @staticmethod
     def filter_condition(status):

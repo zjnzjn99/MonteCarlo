@@ -24,7 +24,7 @@ class MC_AutoCall(MC_Option):
     def KnockOutFilter(self, S):
         pass
 
-    def KnockInFilter(self,S):
+    def KnockInFilter(self, S):
         pass
 
     def Pv(self):
